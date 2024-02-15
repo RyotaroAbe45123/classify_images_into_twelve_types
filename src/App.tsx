@@ -1,94 +1,84 @@
-import { useState, useCallback } from "react";
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
-import { DragDropZone } from "./DragDropZone";
-
+import { useState, ChangeEvent } from 'react'
+import { Box, Button, Heading } from '@chakra-ui/react'
 
 export const App = () => {
-  const [selectedFiles, setSelectedFiles] = useState<File[] | undefined>([]);
+    const [file, setFile] = useState<File>();
 
-  const handleSelectedFiles = useCallback(
-    (files: File[] | undefined) => {
-      setSelectedFiles(files);
-    },
-    [setSelectedFiles]
-  );
-  const handleExecute = useCallback(() => {
-    if (!selectedFiles) return;
-    let fileNameWithLine = "";
-    for (const file of selectedFiles) {
-      fileNameWithLine += `\n - ${file.name}`;
-    }
-    alert(`[Selected files] ${fileNameWithLine}`);
-  }, [selectedFiles]);
-
-
-  return (
-    <Box
-      display="flex"
-      flexDirection="column"
-      justifyContent="space-between"
-      alignItems="center"
-      width="100%"
-      height="100vh"
-    >
-      <Box
-        height="80px"
-        width="100%"
-        position="fixed"
-        top="0px"
-        bgcolor="#6e6d6b"
-        // childrenの中身を縦方向の中央に寄せる
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-      >
-        <Typography
-          variant="h5"
-          color="#ffffff"
-          fontWeight="bold"
-          textAlign="center"
-        >
-          Classify Images Into 12types.
-        </Typography>
-      </Box>
-      <Box
-        // display="flex"
-        // flexDirection="column"
-        // justifyContent="center"
-        // alignItems="center"
-        height="100%"
-        marginTop="200px"
-      >
-        <Typography
-          textAlign="center"
-        >
-          画像をアップロードしてください
-        </Typography>
-        <DragDropZone onSelectedFiles={handleSelectedFiles} />
-        {selectedFiles && selectedFiles?.length > 0
-          && (
-            <Box
-              display="flex"
-              flexDirection="column"
-              justifyContent="center"
-              alignItems="center"
-              // position="fixed"
-              // bottom="200px"
-              marginTop="50px"
-            >
-              <Button
-                variant="contained"
-                size="large"
-                onClick={handleExecute}
-              >
-                診断開始
-              </Button>
-            </Box>
-          )
+    const handleInputFile = (event: ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files) {
+            setFile(event.target.files[0]);
         }
-      </Box>
-    </Box>
-  );
+    }
+
+    const handleSubmit = async() => {
+        if (!file) return;
+        const endpoint = process.env.REACT_APP_API_ENDPOINT;
+        if (!endpoint) return;
+        const formData = new FormData();
+        formData.append('image', file);
+        
+        const response = await fetch(
+            `${endpoint}/image`,
+            {
+                method: "POST",
+                body: formData,
+            }
+        )
+        const data = await response.json();
+        console.log(data);
+    }
+
+    return (
+        <Box
+            display="flex"
+            flexDirection="column"
+            justifyContent="space-between"
+            alignItems="center"
+            width="100%"
+            height="100vh"
+        >
+            <Box
+                height="80px"
+                width="100%"
+                position="fixed"
+                top="0px"
+                bgColor="#A0AEC0"
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+            >
+                <Heading
+                    color="#fff"
+                    textAlign="center"
+                >
+                    Classify Images Into 12types.
+                </Heading>
+            </Box>
+            <Box
+                marginTop="300px"
+            >
+                <form onSubmit={handleSubmit}>
+                    <Box
+                        display="flex"
+                        flexDirection="column"
+                        justifyContent="center"
+                        alignItems="center"
+                    >
+                        <input
+                            type="file"
+                            onChange={handleInputFile}
+                        />
+                        <Button
+                            marginTop="30px"
+                            colorScheme="gray"
+                            size="lg"
+                            onClick={handleSubmit}
+                        >
+                            診断開始
+                        </Button>
+                    </Box>
+                </form>
+            </Box>
+        </Box>
+    )
 }
