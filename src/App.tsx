@@ -125,7 +125,6 @@ export const App = () => {
                                     width="200px"
                                     height="200px"
                                     overflow="hidden"
-                                    borderRadius="200px"
                                 >
                                     <Image
                                         fit="cover"
