@@ -97,7 +97,7 @@ export const App = () => {
                     alignItems="center"
                 >
                     {
-                        personalType && (
+                        personalType !== null && (
                             <Box>
                                 <Box
                                     display="flex"
